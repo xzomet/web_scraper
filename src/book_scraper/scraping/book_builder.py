@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from bs4 import Tag
 
@@ -17,6 +17,7 @@ from book_scraper.scraping.parse_primitives import (
     parse_tax,
     parse_thumbnail_url,
     parse_title,
+    parse_upc,
     parse_url,
 )
 
@@ -33,11 +34,13 @@ class BookBuilder:
         self._data["availability"] = parse_availability(pod)
         return self
 
-    def with_detail_html(self, html: str) -> "BookBuilder":
+    def with_detail_html(self, html: str, url: str) -> "BookBuilder":
+        self._data["url"] = url
         self._data["description"] = parse_description(html)
-        self._data["category_name"] = parse_category_name(html)
+        self._data["category"] = parse_category_name(html)
         self._data["thumbnail_url"] = parse_thumbnail_url(html)
         product_info = parse_product_info(html)
+        self._data["upc"] = parse_upc(product_info)
         self._data["price_excl_tax"] = parse_price_excl_tax(product_info)
         self._data["price_incl_tax"] = parse_price_incl_tax(product_info)
         self._data["tax"] = parse_tax(product_info)
@@ -46,9 +49,9 @@ class BookBuilder:
         return self
 
     def build(self) -> Book:
-        REQUEIRED_FIELDS = ["url", "title"]
+        REQUEIRED_FIELDS = ["url"]
         for field in REQUEIRED_FIELDS:
             if field not in self._data:
                 raise ValueError(f"Missing required field: {field}")
-        self._data["scraped_at"] = datetime.utcnow()
+        self._data["scraped_at"] = datetime.now(UTC)
         return Book(**self._data)

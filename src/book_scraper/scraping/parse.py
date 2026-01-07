@@ -69,6 +69,9 @@ def parse_catalogue_pod(pod: Tag) -> Optional[Book]:
     return builder.build()
 
 
+# ---------- catalogue parsing  ----------
+
+
 def catalogue_parser() -> List[Book]:
     """
     Parse all catalogue HTML files into Book objects.
@@ -82,8 +85,8 @@ def catalogue_parser() -> List[Book]:
     logger.info("Starting catalogue parsing")
 
     for entry in mapping:
-        filename = entry.get("filename")
-        path = HTML_DIR / entry["filename"]
+        filename = entry["filename"]
+        path = HTML_DIR / filename
 
         logger.debug("Parsing catalogue file: %s", filename)
 
@@ -110,21 +113,46 @@ def catalogue_parser() -> List[Book]:
     return books
 
 
-def parse_detail_html(html: str) -> Optional[Book]:
-    builder = BookBuilder().with_detail_html(html)
+def parse_detail_html(html: str, url: str) -> Optional[Book]:
+    """
+    Parse a detail page HTML into a Book.
+
+    Returns:
+        Book if parsing succeeds, None otherwise.
+    """
+    builder = BookBuilder().with_detail_html(html, url)
     return builder.build()
 
 
 def detail_parser() -> List[Book]:
+    """
+    Parse all detail HTML files into Book objects.
+
+    Returns:
+        List of enriched Book objects.
+    """
+    logger.info("Starting detail parsing")
     mapping = load_mapping(DETAILS_MAPPING_FILE)
     books: List[Book] = []
 
     for entry in mapping:
+        filename = entry.get("filename")
+        url = entry["url"]
         path = HTML_DIR / entry["filename"]
 
-        html = read_html(path)
-        book = parse_detail_html(html)
+        logger.debug("Parsing detail file: %s", filename)
+
+        try:
+            html = read_html(path)
+        except Exception:
+            logger.exception("Failed to read detail HTML: %s", filename)
+            continue
+
+        book = parse_detail_html(html, url)
+
         if book is None:
+            logger.warning("Failed to parse detail page: %s", filename)
             continue
         books.append(book)
+    logger.info("Detail parsing complete: %d books parsed", len(books))
     return books

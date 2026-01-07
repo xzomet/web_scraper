@@ -33,11 +33,11 @@ def parse_title(pod: Tag) -> Optional[str]:
 def parse_url(pod: Tag) -> Optional[str]:
     a_tag = pod.select_one("h3 > a")
     if not a_tag:
-        logger.error("a_tag doesnt have h3 > a")
+        logger.warning("a_tag doesnt have h3 > a")
         return None
     href = a_tag.get("href")
     if not href:
-        logger.error("no href in a_tag")
+        logger.warning("no href in a_tag")
         return None
     return urljoin(BASE_SITE, href)
 
@@ -85,15 +85,15 @@ def parse_category_name(html: str) -> Optional[str]:
     soup = BeautifulSoup(html, "lxml")
     un_breadcrumb = soup.select_one("ul.breadcrumb")
     if not un_breadcrumb:
-        logger.error("No breadcrumb found in HTML")
+        logger.warning("No breadcrumb found in HTML")
         return None
     li_tags = un_breadcrumb.select("li")
     if len(li_tags) < 3:
-        logger.error("Breadcrumb does not have enough li tags")
+        logger.warning("Breadcrumb does not have enough li tags")
         return None
     category_tag = li_tags[2].select_one("a")
     if not category_tag:
-        logger.error("No category link found in breadcrumb")
+        logger.warning("No category link found in breadcrumb")
         return None
     return category_tag.text.strip()
 
@@ -102,24 +102,24 @@ def parse_thumbnail_url(html: str) -> Optional[str]:
     soup = BeautifulSoup(html, "lxml")
     img_tag = soup.select_one("div.item.active > img")
     if not img_tag:
-        logger.error("No image tag found in HTML")
+        logger.warning("No image tag found in HTML")
         return None
     src = img_tag.get("src")
     if not src:
-        logger.error("No src attribute found in image tag")
+        logger.warning("No src attribute found in image tag")
         return None
     return urljoin(CATALOGUE_SITE, src)
 
 
 def parse_description(html: str) -> Optional[str]:
     soup = BeautifulSoup(html, "lxml")
-    desc_header = soup.find("h2", string="Product Description")
+    desc_header = soup.find("div", id="product_description")
     if not desc_header:
-        logger.error("No product description header found in HTML")
+        logger.warning("No product description header found in HTML")
         return None
     desc_paragraph = desc_header.find_next_sibling("p")
     if not desc_paragraph:
-        logger.error("No product description paragraph found in HTML")
+        logger.warning("No product description paragraph found in HTML")
         return None
     return desc_paragraph.text.strip()
 
@@ -130,7 +130,7 @@ def parse_product_info(html: str) -> Dict[str, Optional[str]]:
     info: Dict[str, Optional[str]] = {}
 
     if not table:
-        logger.error("No product information table found in HTML")
+        logger.warning("No product information table found in HTML")
         return info
 
     for row in table.find_all("tr"):
