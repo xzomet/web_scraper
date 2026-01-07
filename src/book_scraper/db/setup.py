@@ -1,12 +1,12 @@
-import sqlite3
-from typing import Any, List, Tuple
+import logging
+from sqlite3 import Cursor
 
 from book_scraper.db.database import Database
-from book_scraper.models.book import Book
-from book_scraper.scraping.parse import main as generate_books
+
+logger = logging.getLogger(__name__)
 
 
-def create_books_table(cur):
+def create_books_table(cur: Cursor) -> None:
     cur.execute(
         """
         CREATE TABLE IF NOT EXISTS books (
@@ -16,57 +16,27 @@ def create_books_table(cur):
             list_price REAL,
             availability BOOLEAN DEFAULT TRUE,
             rating INTEGER CHECK (rating >= 0 AND rating <= 5),
+            category TEXT,
+            description TEXT,
+            thumbnail_url TEXT,
+            upc TEXT,
+            price_excl_tax FLOAT,
+            price_incl_tax FLOAT,
+            tax FLOAT,
+            availability_count INTEGER,
+            num_reviews INTEGER,
             scraped_at TEXT NOT NULL
         )
     """
     )
 
-
-def books_to_sql(books: List[Book]) -> List[Tuple[Any, ...]]:
-    return [
-        (
-            b.title,
-            b.url,
-            b.list_price,
-            b.availability,
-            b.rating,
-            b.scraped_at.isoformat(),
-        )
-        for b in books
-    ]
+    logger.info("Ensured books table exists")
 
 
-def insert_into_db(cur: sqlite3.Cursor, books: List[Book]):
-    cur.executemany(
-        """
-        INSERT INTO books (
-            title,
-            url,
-            list_price,
-            availability,
-            rating,
-            scraped_at
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        books_to_sql(books),
-    )
-
-
-def main():
-    db = Database()
-    conn = db.connection
-    cur = conn.cursor()
-
-    create_books_table(cur)
-
-    books: List[Book] = generate_books()
-
-    insert_into_db(cur, books)
-
-    conn.commit()
-
-    conn.close()
+def main() -> None:
+    with Database() as conn:
+        cur = conn.cursor()
+        create_books_table(cur)
 
 
 if __name__ == "__main__":
