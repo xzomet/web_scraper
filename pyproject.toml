@@ -1,0 +1,28 @@
+[tool.pyright]
+reportMissingTypeStubs = true
+
+[tool.poetry]
+name = "price-tracker"
+version = "0.1.0"
+packages = [{ include = "book_scraper", from = "src" }]
+description = ""
+authors = ["xzomet <enistuzer@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+ipython = "^9.7.0"
+matplotlib = "^3.10.7"
+bs4 = "^0.0.2"
+asyncio = "^4.0.0"
+aiohttp = "^3.13.2"
+aiodns = "^3.6.1"
+brotli = "^1.2.0"
+black = "^25.12.0"
+pytest = "^9.0.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
