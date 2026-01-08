@@ -14,7 +14,7 @@ from book_scraper.scraping.parse_primitives import (
 def test_happy_path_parse_title():
     html = """
          <article class="product_pod">
-            <h3><a href="catalogue/a-light-in-the-attic_1000/index.html" title="A Light in the Attic">A Light in the Attic</a></h3>
+            <h3><a href="a-light-in-the-attic_1000/index.html" title="A Light in the Attic">A Light in the Attic</a></h3>
         </article>
      """
     soup = BeautifulSoup(html, "lxml")
@@ -26,7 +26,7 @@ def test_happy_path_parse_title():
 def test_happy_path_parse_url():
     html = """
          <article class="product_pod">
-            <h3><a href="catalogue/a-light-in-the-attic_1000/index.html" title="A Light in the Attic">A Light in the Attic</a></h3>
+            <h3><a href="a-light-in-the-attic_1000/index.html" title="A Light in the Attic">A Light in the Attic</a></h3>
         </article>
      """
     soup = BeautifulSoup(html, "lxml")
@@ -125,7 +125,7 @@ def test_missing_data_parse_availability():
 def test_missing_data_parse_title():
     html = """
      <article class="product_pod">
-        <h3><a href="catalogue/a-light-in-the-attic_1000/index.html" title=""></a></h3>
+        <h3><a href="a-light-in-the-attic_1000/index.html" title=""></a></h3>
         </article>
      """
     soup = BeautifulSoup(html, "lxml")
@@ -152,7 +152,7 @@ def test_missing_data_parse_url():
 def test_malformed_html_parse_title():
     html = """
      <article class="product_pod">
-        <h3><a href="catalogue/a-light-in-the-attic_1000/index.html" title="A Light in the Attic">A Light in the Attic
+        <h3><a href="a-light-in-the-attic_1000/index.html" title="A Light in the Attic">A Light in the Attic
         </article>
      """
     soup = BeautifulSoup(html, "lxml")
@@ -203,7 +203,7 @@ def test_malformed_html_parse_rating():
 def test_malformed_html_parse_url():
     html = """
      <article class="product_pod">
-        <h3><a href="catalogue/a-light-in-the-attic_1000/index.html" title="A Light in the Attic">A Light in the Attic
+        <h3><a href="a-light-in-the-attic_1000/index.html" title="A Light in the Attic">A Light in the Attic
         </article>
      """
     soup = BeautifulSoup(html, "lxml")

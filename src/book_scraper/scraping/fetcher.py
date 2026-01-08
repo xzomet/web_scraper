@@ -117,11 +117,11 @@ def fetch_urls_from_mapping(path: Path) -> None:
                 logger.warning(f"Invalid entry in mapping file: {entry}")
                 continue
 
-            # path = Path.joinpath(HTML_DIR, filename)
-            # if path.exists:
-            #     if path.stat().st_size > 0:
-            #         logger.debug(f"File {filename} already exists. Skipping.")
-            #         continue
+            file_path = HTML_DIR / filename
+
+            if file_path.exists() and file_path.stat().st_size > 0:
+                logger.debug("File %s already exists. Skipping fetch.", filename)
+                continue
 
             try:
                 html_content = fetcher.fetch_with_retries(url)

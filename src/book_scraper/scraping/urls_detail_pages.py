@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 def build_detail_urls() -> List[str]:
     books = get_all_books()
+    book = books[0]
+    logger.info("DETAIL URL: %s", book.url)
     return [book.url for book in books]
 
 

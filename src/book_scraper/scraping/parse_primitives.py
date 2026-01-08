@@ -12,7 +12,6 @@ from bs4 import BeautifulSoup, Tag
 
 from book_scraper.config.settings import BASE_SITE, CATALOGUE_SITE
 
-# Module-level logger
 logger = logging.getLogger(__name__)
 
 
@@ -31,7 +30,7 @@ def parse_title(pod: Tag) -> Optional[str]:
 
 
 def parse_url(pod: Tag) -> Optional[str]:
-    a_tag = pod.select_one("h3 > a")
+    a_tag = pod.select_one("h3 a")
     if not a_tag:
         logger.warning("a_tag doesnt have h3 > a")
         return None
@@ -39,7 +38,13 @@ def parse_url(pod: Tag) -> Optional[str]:
     if not href:
         logger.warning("no href in a_tag")
         return None
-    return urljoin(BASE_SITE, href)
+
+    # force canonical relative form
+    if not href.startswith("catalogue/"):
+        href = f"catalogue/{href}"
+
+    absolute_url = urljoin(BASE_SITE, href)
+    return absolute_url
 
 
 def parse_float(value: str) -> Optional[float]:
