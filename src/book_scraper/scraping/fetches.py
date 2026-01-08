@@ -1,3 +1,42 @@
+from book_scraper.config.settings import (
+    CALAOGUE_MAX_FAILURES,
+    CATALOGUE_HTML_DIR,
+    CATALOGUE_MAPPING_FILE,
+)
+from book_scraper.scraping.fetcher import fetch_urls_from_mapping
+
+
+def main():
+    fetch_urls_from_mapping(
+        CATALOGUE_MAPPING_FILE, CATALOGUE_HTML_DIR, CALAOGUE_MAX_FAILURES
+    )
+
+
+if __name__ == "__main__":
+    main()
+import logging
+from datetime import datetime
+
+from book_scraper.config.settings import (
+    DETAIL_HTML_DIR,
+    DETAIL_MAX_FAILURES,
+    DETAILS_MAPPING_FILE,
+)
+from book_scraper.scraping.fetcher import fetch_urls_from_mapping
+
+logger = logging.getLogger(__name__)
+
+
+def main():
+    logger.info("Starting fetch of detail pages at %s", datetime.now().isoformat())
+
+    fetch_urls_from_mapping(DETAILS_MAPPING_FILE, DETAIL_HTML_DIR, DETAIL_MAX_FAILURES)
+
+    logger.info("Completed fetch of detail pages at %s", datetime.now().isoformat())
+
+
+if __name__ == "__main__":
+    main()
 import concurrent
 import json
 import logging
@@ -91,13 +130,8 @@ def save_html(path: Path, filename: str, content: str) -> None:
     """Save HTML content to a file."""
     path.mkdir(parents=True, exist_ok=True)
     file_path = path / filename
-
-    tmp_path = file_path.with_suffix(".tmp")
-
-    with tmp_path.open("w", encoding="utf-8") as f:
+    with file_path.open("w", encoding="utf-8") as f:
         f.write(content)
-
-    tmp_path.replace(file_path)
 
 
 def fetch_one(entry: Dict, fetcher: Fetcher, path: Path, cancel_event):
@@ -144,14 +178,15 @@ def fetch_urls_from_mapping(
                 entry = future_to_url[future]
                 try:
                     future.result()
-
                     success += 1
-
-                except Exception:
+                except Exception as exc:
 
                     failure += 1
-
-                    logger.exception("Failed to fetch %s", entry.get("url"))
+                    logger.error(
+                        "Failed to fetch %s (%s)",
+                        entry.get("url"),
+                        exc,
+                    )
                     if failure >= max_failures:
                         logger.error(
                             "Failure threshold reached, cancelling remaining tasks"
