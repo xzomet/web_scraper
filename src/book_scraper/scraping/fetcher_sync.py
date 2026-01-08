@@ -1,8 +1,6 @@
-import concurrent
 import json
 import logging
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
@@ -94,30 +92,42 @@ def save_html(filename: str, content: str) -> None:
         f.write(content)
 
 
-def fetch_one(entry: Dict, fetcher: Fetcher):
-    url = entry.get("url")
-    filename = entry.get("filename")
-
-    if not url or not filename:
-        logger.warning(f"Invalid entry in mapping file: {entry}")
-        return
-
-    file_path = HTML_DIR / filename
-
-    if file_path.exists() and file_path.stat().st_size > 0:
-        logger.debug("File %s already exists. Skipping fetch.", filename)
-        return
-
-    html_content = fetcher.fetch_with_retries(url)
-    save_html(filename, html_content)
-    logger.info("Fetched and saved %s", url)
-
-
 def fetch_urls_from_mapping(path: Path) -> None:
+    """
+    Fetch all URLs listed in a mapping file and persist HTML to disk.
+
+    Side effects:
+        - Reads JSON mapping file at `path`
+        - Writes HTML files into HTML_DIR
+        - Performs network requests
+        - Sleeps between requests
+
+    Raises:
+        json.JSONDecodeError: If mapping file is invalid.
+        requests.RequestException: If a request fails after retries.
+    """
     mapping = load_mapping_file(path)
 
     with Fetcher() as fetcher:
-        with ThreadPoolExecutor(max_workers=5) as executer:
-            future_to_url = {
-                executer.submit(fetch_one, entry, fetcher): entry for entry in mapping
-            }
+        logger.info("Starting build...")
+        for entry in tqdm(mapping, "Fetching"):
+            url = entry.get("url")
+            filename = entry.get("filename")
+
+            if not url or not filename:
+                logger.warning(f"Invalid entry in mapping file: {entry}")
+                continue
+
+            file_path = HTML_DIR / filename
+
+            if file_path.exists() and file_path.stat().st_size > 0:
+                logger.debug("File %s already exists. Skipping fetch.", filename)
+                continue
+
+            try:
+                html_content = fetcher.fetch_with_retries(url)
+                save_html(filename, html_content)
+                time.sleep(SLEEP_BETWEEN_REQUESTS)
+            except Exception as e:
+                logger.error(f"Failed to fetch {url}: {e}")
+    logger.info("Build complete. %d files fetched and saved.", len(mapping))
