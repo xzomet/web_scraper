@@ -121,3 +121,26 @@ def fetch_urls_from_mapping(path: Path) -> None:
             future_to_url = {
                 executer.submit(fetch_one, entry, fetcher): entry for entry in mapping
             }
+
+            success = 0
+            failure = 0
+
+            for future in as_completed(future_to_url):
+                entry = future_to_url[future]
+                try:
+                    future.result()
+                    success += 1
+                except Exception as exc:
+
+                    failure += 1
+                    logger.error(
+                        "Failed to fetch %s (%s)",
+                        entry.get("url"),
+                        exc,
+                    )
+
+        logger.info(
+            "Fetch complete: %d success, %d failed",
+            success,
+            failure,
+        )

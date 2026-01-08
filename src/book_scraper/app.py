@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import List
 
 from book_scraper.db.setup import main as db_setup
@@ -51,6 +52,7 @@ def insert_or_update_books(books: List[Book]) -> None:
 
 def main():
 
+    start = time.time()
     setup_logging()
     db_setup()
 
@@ -63,6 +65,8 @@ def main():
     insert_or_update_books(detail_books)
 
     logger.info("Scraping job completed successfully")
+
+    print(f"Time: {time.time() - start:.2f}s")
 
 
 if __name__ == "__main__":
