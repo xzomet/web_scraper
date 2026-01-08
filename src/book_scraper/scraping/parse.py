@@ -19,9 +19,10 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from book_scraper.config.settings import (
+    CATALOGUE_HTML_DIR,
     CATALOGUE_MAPPING_FILE,
+    DETAIL_HTML_DIR,
     DETAILS_MAPPING_FILE,
-    HTML_DIR,
 )
 from book_scraper.models.book import Book
 from book_scraper.scraping.book_builder import BookBuilder
@@ -86,7 +87,7 @@ def catalogue_parser() -> List[Book]:
 
     for entry in mapping:
         filename = entry["filename"]
-        path = HTML_DIR / filename
+        path = CATALOGUE_HTML_DIR / filename
 
         logger.debug("Parsing catalogue file: %s", filename)
 
@@ -138,7 +139,7 @@ def detail_parser() -> List[Book]:
     for entry in mapping:
         filename = entry.get("filename")
         url = entry["url"]
-        path = HTML_DIR / entry["filename"]
+        path = DETAIL_HTML_DIR / entry["filename"]
 
         logger.debug("Parsing detail file: %s", filename)
 

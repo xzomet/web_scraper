@@ -25,6 +25,14 @@ DETAILS_MAPPING_FILE = MAPPING_DIR / "details_mapping.json"
 HTML_DIR = DATA_DIR / "html"
 HTML_DIR.mkdir(parents=True, exist_ok=True)
 
+
+CATALOGUE_HTML_DIR = HTML_DIR / "catalogue_pages"
+CATALOGUE_HTML_DIR.mkdir(parents=True, exist_ok=True)
+
+DETAIL_HTML_DIR = HTML_DIR / "detail_pages"
+DETAIL_HTML_DIR.mkdir(parents=True, exist_ok=True)
+
+
 DATA_FILE = DATA_DIR / "books.db"
 
 logger.debug("BASE_DIR set to: %s", BASE_DIR)
@@ -43,6 +51,11 @@ POOL_CONNECTIONS = 10
 POOL_MAXSIZE = 10
 MAX_RETRIES = 3
 
+# threding settings
+
+MAX_WORKERS = 5
+CALAOGUE_MAX_FAILURES = 15
+DETAIL_MAX_FAILURES = 150
 
 # User-Agent to mimic a real browser
 DEFAULT_HEADERS = {
