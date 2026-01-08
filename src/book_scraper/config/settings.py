@@ -5,23 +5,22 @@ from urllib.parse import urljoin
 logger = getLogger(__name__)
 
 BASE_DIR = Path(__file__).resolve().parents[2]
-BASE_SITE = "https://books.toscrape.com"
+
+BASE_SITE = "https://books.toscrape.com/"
 CATALOGUE_SITE = urljoin(BASE_SITE, "catalogue/")
+
 # NUM_PAGES is hardcoded because there are fifty catalogue pages in books.toscrape.com
 NUM_PAGES = 50
+
 DATA_DIR = BASE_DIR / "data/"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 MAPPING_DIR = DATA_DIR / "mappings"
 MAPPING_DIR.mkdir(parents=True, exist_ok=True)
 
-CATALOGUE_MAPPING_DIR = MAPPING_DIR / "catalogue"
-CATALOGUE_MAPPING_DIR.mkdir(parents=True, exist_ok=True)
-CATALOGUE_MAPPING_FILE = CATALOGUE_MAPPING_DIR / "catalogue_mapping.json"
+CATALOGUE_MAPPING_FILE = MAPPING_DIR / "catalogue_mapping.json"
 
-DETAILS_MAPPING_DIR = MAPPING_DIR / "details"
-DETAILS_MAPPING_DIR.mkdir(parents=True, exist_ok=True)
-DETAILS_MAPPING_FILE = DETAILS_MAPPING_DIR / "details_mapping.json"
+DETAILS_MAPPING_FILE = MAPPING_DIR / "details_mapping.json"
 
 HTML_DIR = DATA_DIR / "html"
 HTML_DIR.mkdir(parents=True, exist_ok=True)

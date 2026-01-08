@@ -62,6 +62,15 @@ def book_to_sql(book: Book) -> Tuple[Any, ...]:
         book.list_price,
         book.availability,
         book.rating,
+        book.category,
+        book.description,
+        book.thumbnail_url,
+        book.upc,
+        book.price_excl_tax,
+        book.price_incl_tax,
+        book.tax,
+        book.availability_count,
+        book.num_reviews,
         book.scraped_at.isoformat(),
     )
 
@@ -70,6 +79,9 @@ def insert_book(book: Book) -> Book:
     """
     Inserts a new book into the db and returns Book with id.
     """
+
+    if book.scraped_at is None:
+        raise ValueError("Book must have scraped_at before persistence")
 
     with Database() as conn:
         cur = conn.cursor()
@@ -82,9 +94,18 @@ def insert_book(book: Book) -> Book:
                 list_price,
                 availability,
                 rating,
+                category,
+                description,
+                thumbnail_url,
+                upc,
+                price_excl_tax,
+                price_incl_tax,
+                tax,
+                availability_count,
+                num_reviews,
                 scraped_at
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             book_to_sql(book),
         )
@@ -112,6 +133,15 @@ def update_book(book: Book) -> None:
                 list_price = ?,
                 availability = ?,
                 rating = ?,
+                category = ?,
+                description = ?,
+                thumbnail_url = ?,
+                upc = ?,
+                price_excl_tax = ?,
+                price_incl_tax = ?,
+                tax = ?,
+                availability_count = ?,
+                num_reviews = ?,
                 scraped_at = ?
             WHERE id = ?
             """,
@@ -126,3 +156,28 @@ def remove_book(book: Book) -> None:
     with Database() as conn:
         cur = conn.cursor()
         cur.execute("DELETE FROM books WHERE id = ?", (book.id,))
+
+
+def upsert_book(book: Book) -> Book:
+    """
+    Insert or update a book based on its URL.
+
+    If a book with the same URL exists, update it with new data.
+    Otherwise, insert a new row.
+    """
+    existing = get_book_by_url(book.url)
+
+    if existing is None:
+        logger.debug("Inserting new book: %s", book.url)
+        return insert_book(book)
+
+    # merge: prefer new (detail) data if present
+    book.id = existing.id
+
+    for field in vars(book):
+        if getattr(book, field) is None:
+            setattr(book, field, getattr(existing, field))
+
+    logger.debug("Updating existing book: %s", book.url)
+    update_book(book)
+    return book
